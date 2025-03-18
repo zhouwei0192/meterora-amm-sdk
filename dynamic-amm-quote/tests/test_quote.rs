@@ -1,5 +1,8 @@
+// use anchor_client::anchor_lang::AccountDeserialize;
+// use anchor_client::anchor_lang::AccountDeserialize;
 use anchor_client::{solana_client::nonblocking::rpc_client::RpcClient, Cluster};
 use anchor_lang::AccountDeserialize;
+use anchor_lang::AnchorDeserialize;
 use anchor_lang::InstructionData;
 use anchor_lang::ToAccountMetas;
 use anchor_spl::{
@@ -68,8 +71,8 @@ async fn setup_accounts_and_start(
     let vault_a_account = vault_accounts[0].as_ref().unwrap();
     let vault_b_account = vault_accounts[1].as_ref().unwrap();
 
-    let vault_a_state = Vault::try_deserialize(&mut vault_a_account.data.as_ref()).unwrap();
-    let vault_b_state = Vault::try_deserialize(&mut vault_b_account.data.as_ref()).unwrap();
+    let vault_a_state = Vault::deserialize(&mut vault_a_account.data[8..].as_ref()).unwrap();
+    let vault_b_state = Vault::deserialize(&mut vault_b_account.data[8..].as_ref()).unwrap();
 
     let account_keys = [
         pool_key,
@@ -175,28 +178,28 @@ async fn get_quote_data(banks_client: &mut BanksClient, pool: Pubkey) -> QuoteDa
         .get_account(pool_state.a_vault)
         .await
         .unwrap()
-        .map(|account| Vault::try_deserialize(&mut account.data.as_ref()).unwrap())
+        .map(|account| Vault::deserialize(&mut account.data[8..].as_ref()).unwrap())
         .unwrap();
 
     let vault_b_state = banks_client
         .get_account(pool_state.b_vault)
         .await
         .unwrap()
-        .map(|account| Vault::try_deserialize(&mut account.data.as_ref()).unwrap())
+        .map(|account| Vault::deserialize(&mut account.data[8..].as_ref()).unwrap())
         .unwrap();
 
     let pool_vault_a_lp_state = banks_client
         .get_account(pool_state.a_vault_lp)
         .await
         .unwrap()
-        .map(|account| TokenAccount::try_deserialize(&mut account.data.as_ref()).unwrap())
+        .map(|account| TokenAccount::try_deserialize_unchecked(&mut account.data.as_ref()).unwrap())
         .unwrap();
 
     let pool_vault_b_lp_state = banks_client
         .get_account(pool_state.b_vault_lp)
         .await
         .unwrap()
-        .map(|account| TokenAccount::try_deserialize(&mut account.data.as_ref()).unwrap())
+        .map(|account| TokenAccount::try_deserialize_unchecked(&mut account.data.as_ref()).unwrap())
         .unwrap();
 
     let vault_a_lp_mint_state = banks_client

@@ -252,10 +252,10 @@ pub fn compute_pool_tokens(
     let token_a_amount = vault_a
         .vault
         .get_amount_by_share(current_time, vault_a.lp_amount, vault_a.lp_supply)
-        .ok_or(PoolError::MathOverflow)?;
+        .ok_or(PoolError::MathOverflow).unwrap();
     let token_b_amount = vault_b
         .vault
         .get_amount_by_share(current_time, vault_b.lp_amount, vault_b.lp_supply)
-        .ok_or(PoolError::MathOverflow)?;
+        .ok_or(PoolError::MathOverflow).unwrap();
     Ok((token_a_amount, token_b_amount))
 }
